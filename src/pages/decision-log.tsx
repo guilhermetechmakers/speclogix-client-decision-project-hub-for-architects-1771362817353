@@ -149,7 +149,11 @@ export function DecisionLogPage() {
               onApprove={(optionId) => approveMutation.mutate(optionId)}
               onRequestChanges={(comment) => requestChangesMutation.mutate(comment)}
               onAddComment={(body) => addCommentMutation.mutate(body)}
-              onSign={decision.status === 'approved' && !decision.signed_at ? () => signMutation.mutate() : undefined}
+              onSign={
+                decision.status === 'approved' && !decision.signed_at
+                  ? (payload) => signMutation.mutateAsync(payload)
+                  : undefined
+              }
               isApproving={approveMutation.isPending}
               isRequestingChanges={requestChangesMutation.isPending}
               isAddingComment={addCommentMutation.isPending}
@@ -197,7 +201,7 @@ export function DecisionLogPage() {
   // List view
   return (
     <>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-6 animate-fade-in [@media(prefers-reduced-motion:reduce)]:animate-none">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-foreground">

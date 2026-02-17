@@ -1,6 +1,7 @@
--- Decision Log: comparison cards for client choices (options, approvals, cost impacts, versioning).
+-- Decision Log (Approvals & E-signature Capture): comparison cards for client choices.
+-- Implements task schema: decision_log table + RLS. Extended tables support options,
+-- cost impacts, comments, audit timeline, and version history.
 -- Run in Supabase SQL editor or via Supabase CLI.
--- Base schema per task; extended columns support full Decision Log UI.
 
 -- Main decision_log table
 CREATE TABLE IF NOT EXISTS decision_log (
@@ -151,6 +152,26 @@ CREATE POLICY "decision_audit_read_own_decision" ON decision_audit
     EXISTS (SELECT 1 FROM decision_log d WHERE d.id = decision_id AND d.user_id = auth.uid())
   );
 CREATE POLICY "decision_audit_insert_own_decision" ON decision_audit
+  FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM decision_log d WHERE d.id = decision_id AND d.user_id = auth.uid())
+  );
+
+-- Optional: version history for VersioningView (chronological versions, diff, export PDF)
+CREATE TABLE IF NOT EXISTS decision_version (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  decision_id UUID NOT NULL REFERENCES decision_log(id) ON DELETE CASCADE,
+  version_number INT NOT NULL DEFAULT 1,
+  snapshot JSONB NOT NULL DEFAULT '{}',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE decision_version ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "decision_version_read_own_decision" ON decision_version
+  FOR SELECT USING (
+    EXISTS (SELECT 1 FROM decision_log d WHERE d.id = decision_id AND d.user_id = auth.uid())
+  );
+CREATE POLICY "decision_version_insert_own_decision" ON decision_version
   FOR INSERT WITH CHECK (
     EXISTS (SELECT 1 FROM decision_log d WHERE d.id = decision_id AND d.user_id = auth.uid())
   );

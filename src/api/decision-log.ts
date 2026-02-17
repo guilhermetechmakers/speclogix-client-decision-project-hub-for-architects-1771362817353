@@ -53,8 +53,13 @@ export async function addComment(id: string, body: string): Promise<{ id: string
   return api.post<{ id: string; created_at: string }>(`${BASE}/${id}/comments`, { body })
 }
 
-export async function signDecision(id: string): Promise<DecisionLog> {
-  return api.post<DecisionLog>(`${BASE}/${id}/sign`, {})
+export interface SignDecisionPayload {
+  signer_name?: string
+  signed_at?: string
+}
+
+export async function signDecision(id: string, payload?: SignDecisionPayload): Promise<DecisionLog> {
+  return api.post<DecisionLog>(`${BASE}/${id}/sign`, payload ?? {})
 }
 
 export async function bulkRemindApprovers(ids: string[]): Promise<{ sent: number }> {

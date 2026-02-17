@@ -25,9 +25,11 @@ import {
   PenLine,
   DollarSign,
   Image,
+  CheckCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DecisionLog, DecisionOption } from '@/types/decision-log'
+import { ESignCaptureModal } from './ESignCaptureModal'
 
 const commentSchema = z.object({ body: z.string().min(1, 'Comment is required') })
 type CommentFormValues = z.infer<typeof commentSchema>
@@ -40,7 +42,7 @@ export interface DecisionDetailPanelProps {
   onApprove: (selectedOptionId: string) => void
   onRequestChanges: (comment: string) => void
   onAddComment: (body: string) => void
-  onSign?: () => void
+  onSign?: (payload?: { signerName: string; signedAt: string }) => void
   isApproving?: boolean
   isRequestingChanges?: boolean
   isAddingComment?: boolean
@@ -62,6 +64,7 @@ export function DecisionDetailPanel({
     decision.selected_option_id ?? decision.recommended_option_id ?? null
   )
   const [requestChangesOpen, setRequestChangesOpen] = useState(false)
+  const [esignOpen, setEsignOpen] = useState(false)
 
   const options = decision.options ?? []
   const comments = decision.comments ?? []
@@ -101,9 +104,10 @@ export function DecisionDetailPanel({
   const canApprove = decision.status === 'pending' && selectedOptionId
   const canRequestChanges = decision.status === 'pending'
   const canSign = decision.status === 'approved' && !decision.signed_at && onSign
+  const isSigned = Boolean(decision.signed_at)
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in [@media(prefers-reduced-motion:reduce)]:animate-none">
       <nav className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
         <Link
           to="/dashboard/decisions"
@@ -220,12 +224,17 @@ export function DecisionDetailPanel({
               )}
               {canSign && (
                 <Button
-                  onClick={onSign}
+                  onClick={() => setEsignOpen(true)}
                   disabled={isSigning}
                   className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <PenLine className="h-4 w-4 mr-1" /> E-sign
                 </Button>
+              )}
+              {isSigned && (
+                <Badge variant="secondary" className="gap-1 bg-primary/10 text-primary border-primary/20">
+                  <CheckCircle className="h-3.5 w-3.5" /> Signed
+                </Badge>
               )}
             </div>
           </div>
@@ -338,6 +347,39 @@ export function DecisionDetailPanel({
           )}
         </CardContent>
       </Card>
+
+      {/* Approval success & next steps */}
+      {decision.status === 'approved' && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex flex-wrap items-start gap-3">
+              <div className="rounded-full bg-primary/10 p-2">
+                <CheckCircle className="h-5 w-5 text-primary" aria-hidden />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Approval recorded</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  This decision has been approved. {isSigned ? 'E-signature has been captured and stored in the audit trail.' : 'You can add an e-signature above to complete the record.'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Next steps: the project timeline will reflect this approval. Share the decision summary with stakeholders if needed.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* E-signature capture modal */}
+      {onSign && (
+        <ESignCaptureModal
+          open={esignOpen}
+          onOpenChange={setEsignOpen}
+          decisionTitle={decision.title}
+          isSigning={isSigning}
+          onConfirm={(data) => onSign(data)}
+        />
+      )}
 
       {/* Audit timeline */}
       {audit.length > 0 && (

@@ -112,7 +112,8 @@ export function useAddComment(id: string) {
 export function useSignDecision(id: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => api.signDecision(id),
+    mutationFn: (payload?: { signerName: string; signedAt: string }) =>
+      api.signDecision(id, payload ? { signer_name: payload.signerName, signed_at: payload.signedAt } : undefined),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['decisions'] })
       qc.invalidateQueries({ queryKey: KEYS.detail(id) })
