@@ -34,7 +34,7 @@ export function VersioningView({
 
   return (
     <div className={cn('space-y-4', className)}>
-      <Card>
+      <Card className="border border-border shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" /> Version history
@@ -45,7 +45,10 @@ export function VersioningView({
         </CardHeader>
         <CardContent className="space-y-4">
           {sortedVersions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No versions yet.</p>
+            <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center">
+              <FileText className="h-10 w-10 mx-auto text-muted-foreground mb-2" aria-hidden />
+              <p className="text-sm text-muted-foreground">No versions yet.</p>
+            </div>
           ) : (
             <>
               <div className="flex flex-wrap gap-2">
@@ -55,15 +58,16 @@ export function VersioningView({
                     variant={selectedVersionId === v.id ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedVersionId(v.id)}
+                    className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
                   >
                     v{v.version_number}
                   </Button>
                 ))}
               </div>
               {selectedVersion && (
-                <div className="rounded-lg border border-border bg-muted/30 p-4">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <Badge variant="secondary">
+                <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <Badge variant="secondary" className="font-normal">
                       Version {selectedVersion.version_number} ·{' '}
                       {new Date(selectedVersion.created_at).toLocaleString()}
                     </Badge>
@@ -73,12 +77,13 @@ export function VersioningView({
                         size="sm"
                         onClick={() => onExportPdf(selectedVersion.id)}
                         disabled={isExporting}
+                        className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <Download className="h-4 w-4 mr-1" /> Export PDF
                       </Button>
                     )}
                   </div>
-                  <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                  <div className="text-sm prose prose-sm max-w-none dark:prose-invert rounded-lg bg-background/50 p-3 border border-border/50">
                     <VersionDiffHighlight snapshot={selectedVersion.snapshot} />
                   </div>
                 </div>
@@ -89,7 +94,7 @@ export function VersioningView({
                   size="sm"
                   onClick={() => onExportPdf()}
                   disabled={isExporting}
-                  className="mt-2"
+                  className="mt-2 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <FileText className="h-4 w-4 mr-1" /> Export current as PDF
                 </Button>
@@ -107,15 +112,21 @@ function VersionDiffHighlight({ snapshot }: { snapshot: Record<string, unknown> 
   const description = (snapshot.description as string) ?? ''
   const options = (snapshot.options as Array<{ title?: string; description?: string }>) ?? []
   return (
-    <div className="space-y-2">
-      <p><strong>Title:</strong> {title}</p>
-      {description && <p><strong>Description:</strong> {description}</p>}
+    <div className="space-y-3">
+      <p className="rounded px-1.5 py-0.5 bg-primary/5 border-l-2 border-primary/50">
+        <strong className="text-foreground">Title:</strong> <span className="text-foreground">{title}</span>
+      </p>
+      {description && (
+        <p className="rounded px-1.5 py-0.5 bg-muted/50 border-l-2 border-muted-foreground/30">
+          <strong className="text-foreground">Description:</strong> <span className="text-muted-foreground">{description}</span>
+        </p>
+      )}
       {options.length > 0 && (
-        <div>
-          <strong>Options:</strong>
-          <ul className="list-disc pl-5 mt-1">
+        <div className="rounded px-1.5 py-0.5 bg-muted/30 border-l-2 border-border">
+          <strong className="text-foreground">Options:</strong>
+          <ul className="list-disc pl-5 mt-1 space-y-0.5">
             {options.map((o, i) => (
-              <li key={i}>{o.title ?? 'Untitled'} {o.description && `— ${o.description}`}</li>
+              <li key={i} className="text-foreground">{o.title ?? 'Untitled'} {o.description && <span className="text-muted-foreground">— {o.description}</span>}</li>
             ))}
           </ul>
         </div>

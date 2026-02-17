@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Plus, Trash2, Upload, ArrowRight, ArrowLeft } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import type { DecisionPhase } from '@/types/decision-log'
 
 const stepSchema = z.object({
@@ -143,8 +144,25 @@ export function CreateDecisionModal({
         <DialogHeader>
           <DialogTitle>Create decision</DialogTitle>
           <DialogDescription>
-            Add options, media, cost impacts, and assign an approver. Step {step + 1} of 2.
+            Add options, media, cost impacts, and assign an approver.
           </DialogDescription>
+          <div className="flex gap-2 pt-2" role="tablist" aria-label="Wizard steps">
+            <div
+              className={cn(
+                'h-2 flex-1 rounded-full transition-colors duration-300',
+                step >= 0 ? 'bg-primary' : 'bg-muted'
+              )}
+              aria-current={step === 0 ? 'step' : undefined}
+            />
+            <div
+              className={cn(
+                'h-2 flex-1 rounded-full transition-colors duration-300',
+                step >= 1 ? 'bg-primary' : 'bg-muted'
+              )}
+              aria-current={step === 1 ? 'step' : undefined}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground pt-1">Step {step + 1} of 2</p>
         </DialogHeader>
 
         <form id="create-decision-form" onSubmit={onFormSubmit} className="space-y-6">
@@ -156,7 +174,7 @@ export function CreateDecisionModal({
                   id="title"
                   {...register('title')}
                   placeholder="e.g. Fixture package A"
-                  className="mt-1"
+                  className="mt-1 focus-visible:ring-2 focus-visible:ring-ring transition-shadow duration-200"
                 />
                 {errors.title && (
                   <p className="text-sm text-destructive mt-1">{errors.title.message}</p>
@@ -289,7 +307,12 @@ export function CreateDecisionModal({
                 <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
                   <ArrowLeft className="h-4 w-4 mr-1" /> Back
                 </Button>
-                <Button type="submit" form="create-decision-form" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  form="create-decision-form"
+                  disabled={isSubmitting}
+                  className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
                   {isSubmitting ? 'Creating…' : 'Create decision'}
                 </Button>
               </>

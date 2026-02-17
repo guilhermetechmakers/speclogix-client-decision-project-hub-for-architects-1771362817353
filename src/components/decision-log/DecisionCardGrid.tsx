@@ -77,13 +77,14 @@ export function DecisionCardGrid({
           <Card
             key={d.id}
             className={cn(
-              'group transition-all duration-300 hover:shadow-card-hover',
-              viewMode === 'grid' && 'hover:-translate-y-0.5',
-              isSelected && 'ring-2 ring-primary'
+              'group relative overflow-hidden transition-all duration-300 hover:shadow-card-hover',
+              viewMode === 'grid' && 'hover:-translate-y-1 hover:shadow-lg',
+              isSelected && 'ring-2 ring-primary ring-offset-2'
             )}
             role="listitem"
           >
-            <CardHeader className="pb-2">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/80 to-primary/40 opacity-90" aria-hidden />
+            <CardHeader className="pb-2 pt-5">
               <div className="flex items-start justify-between gap-2">
                 {showSelection && (
                   <Checkbox
@@ -99,7 +100,7 @@ export function DecisionCardGrid({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 shrink-0"
+                      className="h-10 w-10 shrink-0 min-w-[44px] min-h-[44px]"
                       aria-label="Open menu"
                     >
                       <MoreHorizontal className="h-4 w-4" />
@@ -107,10 +108,7 @@ export function DecisionCardGrid({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link to={`/dashboard/decisions/${d.id}`}>View</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to={`/dashboard/decisions/${d.id}/edit`}>Edit</Link>
+                      <Link to={`/dashboard/decisions/${d.id}`}>View details</Link>
                     </DropdownMenuItem>
                     {onArchive && (
                       <DropdownMenuItem
@@ -136,7 +134,7 @@ export function DecisionCardGrid({
                   {d.status.replace('_', ' ')}
                 </Badge>
                 {selectedLabel && (
-                  <Badge variant="outline" className="font-normal">
+                  <Badge className="font-normal bg-primary/10 text-primary border-primary/30">
                     Selected: {selectedLabel}
                   </Badge>
                 )}
@@ -147,14 +145,14 @@ export function DecisionCardGrid({
                   Due {d.due_date ?? '—'}
                 </span>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" title="Comments" asChild>
+                  <Button variant="ghost" size="icon" className="h-10 w-10 min-w-[44px] min-h-[44px]" title="Comments" asChild>
                     <Link to={`/dashboard/decisions/${d.id}#comments`}>
                       <MessageSquare className="h-4 w-4" aria-hidden />
                       <span className="sr-only">Comments</span>
                     </Link>
                   </Button>
                   {d.status === 'pending' && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Approve" asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 min-w-[44px] min-h-[44px]" title="Approve" asChild>
                       <Link to={`/dashboard/decisions/${d.id}`}>
                         <CheckCircle2 className="h-4 w-4" aria-hidden />
                         <span className="sr-only">Approve</span>

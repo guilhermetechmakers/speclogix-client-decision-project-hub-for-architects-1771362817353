@@ -140,14 +140,25 @@ export function DecisionLogPage() {
               isAddingComment={addCommentMutation.isPending}
               isSigning={signMutation.isPending}
             />
-            {decision.versions && decision.versions.length > 0 && (
-              <VersioningView
-                versions={decision.versions}
-                decisionId={decision.id}
-                decisionTitle={decision.title}
-                onExportPdf={() => {}}
-              />
-            )}
+        {decision.versions && decision.versions.length > 0 && (
+            <VersioningView
+              versions={decision.versions}
+              decisionId={decision.id}
+              decisionTitle={decision.title}
+              onExportPdf={(versionId) => {
+                bulkExportHistory([decision.id])
+                  .then((blob) => {
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = `decision-${decision.title.replace(/\s+/g, '-')}-${versionId ?? 'current'}.pdf`
+                    a.click()
+                    URL.revokeObjectURL(url)
+                  })
+                  .catch(() => {})
+              }}
+            />
+          )}
           </div>
         )}
       </>
@@ -174,12 +185,17 @@ export function DecisionLogPage() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Decision Log</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-foreground">
+              Decision Log
+            </h1>
+            <p className="text-muted-foreground mt-1 text-[15px] leading-relaxed max-w-xl">
               Publish comparison cards for client choices. Track options, approvals, and e-sign.
             </p>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+          >
             <Plus className="h-4 w-4 mr-2" /> Create decision
           </Button>
         </div>
@@ -229,14 +245,19 @@ export function DecisionLogPage() {
         )}
 
         {!listLoading && !listError && decisions.length === 0 && (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <ClipboardList className="h-12 w-12 text-muted-foreground mb-4" aria-hidden />
-              <h3 className="font-semibold">No decisions yet</h3>
-              <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                Create your first decision to share options and capture client approvals.
+          <Card className="border-dashed border-2 rounded-2xl bg-card/50">
+            <CardContent className="flex flex-col items-center justify-center py-16 px-6 text-center">
+              <div className="rounded-2xl bg-muted/50 p-6 mb-4">
+                <ClipboardList className="h-14 w-14 text-muted-foreground" aria-hidden />
+              </div>
+              <h3 className="text-lg font-semibold">No decisions yet</h3>
+              <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
+                Create your first decision to share options, attach media and cost impacts, and capture client approvals.
               </p>
-              <Button className="mt-4" onClick={() => setCreateOpen(true)}>
+              <Button
+                className="mt-6 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => setCreateOpen(true)}
+              >
                 Create decision
               </Button>
             </CardContent>
@@ -253,3 +274,5 @@ export function DecisionLogPage() {
     </>
   )
 }
+
+export default DecisionLogPage

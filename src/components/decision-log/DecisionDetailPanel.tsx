@@ -112,11 +112,12 @@ export function DecisionDetailPanel({
         </Button>
       </div>
 
-      <Card>
+      <Card className="overflow-hidden border border-border shadow-card">
+        <div className="h-1 w-full bg-gradient-to-r from-primary/80 to-primary/40" aria-hidden />
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <CardTitle className="text-xl">{decision.title}</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">{decision.title}</CardTitle>
               {decision.summary && (
                 <CardDescription className="mt-1">{decision.summary}</CardDescription>
               )}
@@ -151,13 +152,18 @@ export function DecisionDetailPanel({
                 <Button
                   onClick={() => selectedOptionId && onApprove(selectedOptionId)}
                   disabled={!selectedOptionId || isApproving}
+                  className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <CheckCircle2 className="h-4 w-4 mr-1" /> Approve
                 </Button>
               )}
               {canRequestChanges && (
                 <>
-                  <Button variant="outline" onClick={() => setRequestChangesOpen(true)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setRequestChangesOpen(true)}
+                    className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                  >
                     Request changes
                   </Button>
                   <Dialog open={requestChangesOpen} onOpenChange={setRequestChangesOpen}>
@@ -201,7 +207,11 @@ export function DecisionDetailPanel({
                 </>
               )}
               {canSign && (
-                <Button onClick={onSign} disabled={isSigning}>
+                <Button
+                  onClick={onSign}
+                  disabled={isSigning}
+                  className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
                   <PenLine className="h-4 w-4 mr-1" /> E-sign
                 </Button>
               )}
@@ -210,14 +220,14 @@ export function DecisionDetailPanel({
         </CardHeader>
       </Card>
 
-      {/* Option comparison: side-by-side */}
+      {/* Option comparison: side-by-side media */}
       {options.length > 0 && (
-        <Card>
+        <Card className="border border-border shadow-sm transition-shadow duration-200 hover:shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" /> Option comparison
             </CardTitle>
-            <CardDescription>Select an option to approve.</CardDescription>
+            <CardDescription>Select an option to approve. Compare media side-by-side.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -282,7 +292,11 @@ export function DecisionDetailPanel({
         </CardHeader>
         <CardContent className="space-y-4">
           {comments.length === 0 && (
-            <p className="text-sm text-muted-foreground">No comments yet.</p>
+            <div className="rounded-lg border border-dashed border-border bg-muted/20 py-8 text-center">
+              <MessageSquare className="h-10 w-10 mx-auto text-muted-foreground mb-2" aria-hidden />
+              <p className="text-sm text-muted-foreground">No comments yet.</p>
+              <p className="text-xs text-muted-foreground mt-1">Add a comment below to start the discussion.</p>
+            </div>
           )}
           <ul className="space-y-3">
             {comments.map((c) => (
@@ -363,8 +377,8 @@ function OptionCard({
     <Card
       className={cn(
         'transition-all duration-200',
-        selectable && 'cursor-pointer hover:shadow-card-hover',
-        isSelected && 'ring-2 ring-primary'
+        selectable && 'cursor-pointer hover:shadow-card-hover hover:-translate-y-0.5',
+        isSelected && 'ring-2 ring-primary ring-offset-2'
       )}
       onClick={selectable ? onSelect : undefined}
       role={selectable ? 'button' : undefined}
@@ -374,7 +388,7 @@ function OptionCard({
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-base">{option.title}</CardTitle>
           {isRecommended && (
-            <Badge variant="secondary" className="text-xs">Recommended</Badge>
+            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">Recommended</Badge>
           )}
         </div>
         {option.description && (

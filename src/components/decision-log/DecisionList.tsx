@@ -59,27 +59,28 @@ export function DecisionList({
 
   return (
     <div className={cn('space-y-4', className)}>
-      <form
-        onSubmit={handleSearchSubmit}
-        className="flex flex-wrap items-center gap-3"
-        role="search"
-        aria-label="Filter decisions"
-      >
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden />
-          <Input
-            type="search"
-            placeholder="Search decisions…"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onBlur={() => updateFilter('search', searchInput)}
-            className="pl-9"
-            aria-label="Search decisions"
-          />
-        </div>
-        <Button type="submit" variant="secondary" size="sm">
-          Search
-        </Button>
+      <div className="rounded-xl border border-border bg-card/50 shadow-sm transition-shadow duration-200 hover:shadow-card">
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex flex-wrap items-center gap-3 p-4"
+          role="search"
+          aria-label="Filter decisions"
+        >
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden />
+            <Input
+              type="search"
+              placeholder="Search decisions…"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onBlur={() => updateFilter('search', searchInput)}
+              className="pl-9 transition-[border-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Search decisions"
+            />
+          </div>
+          <Button type="submit" variant="secondary" size="sm" className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
+            Search
+          </Button>
         <Select
           value={filters.phase}
           onValueChange={(v) => updateFilter('phase', v as DecisionListFilters['phase'])}
@@ -145,7 +146,8 @@ export function DecisionList({
             aria-label="Due date to"
           />
         </div>
-      </form>
+        </form>
+      </div>
     </div>
   )
 }

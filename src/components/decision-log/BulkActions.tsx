@@ -78,16 +78,16 @@ export function BulkActions({
   if (!hasSelection) return null
 
   return (
-    <div className={cn('flex flex-wrap items-center gap-2', className)}>
+    <div className={cn('flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card/50 px-4 py-3', className)}>
       <span className="text-sm text-muted-foreground">
         {selectedIds.length} selected
       </span>
-      <Button variant="outline" size="sm" onClick={onClearSelection}>
+      <Button variant="outline" size="sm" onClick={onClearSelection} className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
         Clear
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" aria-label="Bulk actions">
+          <Button variant="outline" size="sm" aria-label="Bulk actions" className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
             Bulk actions
           </Button>
         </DropdownMenuTrigger>
