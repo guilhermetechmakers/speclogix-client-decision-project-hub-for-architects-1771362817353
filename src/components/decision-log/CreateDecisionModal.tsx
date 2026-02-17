@@ -174,7 +174,7 @@ export function CreateDecisionModal({
         cost_impacts: (o.cost_impacts ?? []).filter((c) => c.label?.trim()).map((c) => ({ label: c.label, amount_cents: c.amount_cents, currency: c.currency })),
       })),
     })
-    onOpenChange(false)
+    // Parent closes modal on success (e.g. after navigate)
   })
 
   const onFormSubmit = (e: React.FormEvent) => {

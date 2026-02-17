@@ -104,9 +104,21 @@ export function DecisionDetailPanel({
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <nav className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground" aria-label="Breadcrumb">
+        <Link
+          to="/dashboard/decisions"
+          className="hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded transition-colors"
+        >
+          Decision Log
+        </Link>
+        <span aria-hidden>/</span>
+        <span className="text-foreground font-medium truncate max-w-[200px] sm:max-w-none" aria-current="page">
+          {decision.title}
+        </span>
+      </nav>
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" asChild>
-          <Link to="/dashboard/decisions">
+          <Link to="/dashboard/decisions" className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
             <ArrowLeft className="h-4 w-4 mr-1" /> Back to list
           </Link>
         </Button>

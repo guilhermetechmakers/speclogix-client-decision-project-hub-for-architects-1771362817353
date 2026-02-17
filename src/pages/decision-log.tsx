@@ -9,7 +9,7 @@ import { BulkActions } from '@/components/decision-log/BulkActions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Plus, ClipboardList } from 'lucide-react'
+import { Plus, ClipboardList, LayoutGrid, List } from 'lucide-react'
 import type { DecisionListFilters } from '@/types/decision-log'
 import {
   useDecisions,
@@ -38,6 +38,7 @@ export function DecisionLogPage() {
   const [filters, setFilters] = useState<DecisionListFilters>(defaultFilters)
   const [createOpen, setCreateOpen] = useState(false)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   const { data: decisions = [], isLoading: listLoading, error: listError } = useDecisions(filters)
   const { data: decision, isLoading: detailLoading, error: detailError } = useDecision(
@@ -206,12 +207,38 @@ export function DecisionLogPage() {
               Publish comparison cards for client choices. Track options, approvals, and e-sign.
             </p>
           </div>
-          <Button
-            onClick={() => setCreateOpen(true)}
-            className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
-          >
-            <Plus className="h-4 w-4 mr-2" /> Create decision
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-lg border border-border bg-muted/30 p-0.5" role="tablist" aria-label="View mode">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`rounded-md p-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                  viewMode === 'grid' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-pressed={viewMode === 'grid'}
+                aria-label="Grid view"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={`rounded-md p-2 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                  viewMode === 'list' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-pressed={viewMode === 'list'}
+                aria-label="List view"
+              >
+                <List className="h-4 w-4" />
+              </button>
+            </div>
+            <Button
+              onClick={() => setCreateOpen(true)}
+              className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Create decision
+            </Button>
+          </div>
         </div>
 
         <DecisionList
@@ -235,8 +262,23 @@ export function DecisionLogPage() {
 
         {listLoading && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-48 rounded-lg" />
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="rounded-xl border border-border overflow-hidden shadow-sm animate-fade-in"
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                <Skeleton className="h-2 w-full rounded-none" />
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-6 w-16 rounded-md" />
+                    <Skeleton className="h-6 w-24 rounded-md" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -253,6 +295,7 @@ export function DecisionLogPage() {
         {!listLoading && !listError && decisions.length > 0 && (
           <DecisionCardGrid
             decisions={decisions}
+            viewMode={viewMode}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
           />
