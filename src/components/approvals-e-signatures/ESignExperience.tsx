@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { PenTool, Type, Eraser, Check } from 'lucide-react'
@@ -13,7 +12,7 @@ import type { SignatureCapture } from '@/types/approvals-e-signatures'
 export interface ESignExperienceProps {
   approvalId: string
   legalText?: string
-  requireE-sign: boolean
+  requireESign: boolean
   onSubmitSignature: (payload: SignatureCapture) => void
   onSubmitCheckbox?: () => void
   isSubmitting?: boolean
@@ -23,9 +22,9 @@ const CANVAS_WIDTH = 400
 const CANVAS_HEIGHT = 160
 
 export function ESignExperience({
-  approvalId,
+  approvalId: _approvalId,
   legalText,
-  requireE-sign,
+  requireESign,
   onSubmitSignature,
   onSubmitCheckbox,
   isSubmitting,
@@ -107,7 +106,7 @@ export function ESignExperience({
 
   const handleSubmit = useCallback(() => {
     const signedAt = getTimestamp()
-    if (requireE-sign) {
+    if (requireESign) {
       if (mode === 'draw') {
         const data = getCanvasDataUrl()
         if (!data || data.length < 100) return
@@ -132,7 +131,7 @@ export function ESignExperience({
       onSubmitCheckbox()
     }
   }, [
-    requireE_sign,
+    requireESign,
     mode,
     getCanvasDataUrl,
     typedName,
@@ -144,7 +143,7 @@ export function ESignExperience({
 
   const canSubmit =
     !isSubmitting &&
-    (requireE_sign
+    (requireESign
       ? (mode === 'draw' && getCanvasDataUrl().length > 100) || (mode === 'type' && typedName.trim().length > 0)
       : true) &&
     (!legalText || legalAccepted)
@@ -166,7 +165,7 @@ export function ESignExperience({
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
-        {requireE_sign ? (
+        {requireESign ? (
           <>
             <Tabs value={mode} onValueChange={(v) => setMode(v as 'draw' | 'type')} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
@@ -228,7 +227,7 @@ export function ESignExperience({
                 <Checkbox
                   id="legal-accept"
                   checked={legalAccepted}
-                  onCheckedChange={(v) => setLegalAccepted(v === true)}
+                  onChange={(e) => setLegalAccepted(e.target.checked)}
                   className="mt-0.5"
                   aria-describedby="legal-text"
                 />
@@ -253,7 +252,7 @@ export function ESignExperience({
                 <Checkbox
                   id="legal-accept-checkbox"
                   checked={legalAccepted}
-                  onCheckedChange={(v) => setLegalAccepted(v === true)}
+                  onChange={(e) => setLegalAccepted(e.target.checked)}
                   className="mt-0.5"
                   aria-describedby="legal-text-checkbox"
                 />
@@ -277,7 +276,7 @@ export function ESignExperience({
           >
             {isSubmitting ? (
               'Submitting…'
-            ) : requireE_sign ? (
+            ) : requireESign ? (
               <>
                 <Check className="h-4 w-4" />
                 Submit signature

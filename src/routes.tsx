@@ -15,7 +15,7 @@ import MeetingsAgendasPage from '@/pages/MeetingsAgendas'
 import { TemplatesPage } from '@/pages/templates'
 import TemplatesWorkflowLibraryPage from '@/pages/TemplatesWorkflowLibrary'
 import { TasksRfisPage } from '@/pages/tasks-rfis'
-import { ApprovalsPage } from '@/pages/approvals'
+import ApprovalsESignaturesPage from '@/pages/ApprovalsESignatures'
 import { ReportsPage } from '@/pages/reports'
 import { AdminDashboardPage } from '@/pages/admin-dashboard'
 import { SettingsPage } from '@/pages/settings'
@@ -58,7 +58,8 @@ export const router = createBrowserRouter([
       { path: 'templates', element: <TemplatesPage /> },
       { path: 'templates-workflow-library', element: <TemplatesWorkflowLibraryPage /> },
       { path: 'tasks', element: <TasksRfisPage /> },
-      { path: 'approvals', element: <ApprovalsPage /> },
+      { path: 'approvals', element: <ApprovalsESignaturesPage /> },
+      { path: 'approvals-e-signatures', element: <ApprovalsESignaturesPage /> },
       { path: 'reports', element: <ReportsPage /> },
       { path: 'admin', element: <AdminDashboardPage /> },
       { path: 'settings', element: <SettingsPage /> },
