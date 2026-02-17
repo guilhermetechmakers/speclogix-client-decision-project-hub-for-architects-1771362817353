@@ -16,7 +16,7 @@ import { TemplatesPage } from '@/pages/templates'
 import TemplatesWorkflowLibraryPage from '@/pages/TemplatesWorkflowLibrary'
 import { TasksRfisPage } from '@/pages/tasks-rfis'
 import ApprovalsESignaturesPage from '@/pages/ApprovalsESignatures'
-import { ReportsPage } from '@/pages/reports'
+import ReportsAnalyticsPage from '@/pages/ReportsAnalytics'
 import { AdminDashboardPage } from '@/pages/admin-dashboard'
 import { SettingsPage } from '@/pages/settings'
 import { PricingPage } from '@/pages/pricing'
@@ -30,6 +30,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
   { path: '/decision-log', element: <Navigate to="/dashboard/decisions" replace /> },
   { path: '/meetings-&-agendas', element: <Navigate to="/dashboard/meetings" replace /> },
+  { path: '/reports-&-analytics', element: <Navigate to="/dashboard/reports" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <LoginPage /> },
   { path: '/signup-/-login', element: <SignupLoginPage /> },
@@ -60,7 +61,7 @@ export const router = createBrowserRouter([
       { path: 'tasks', element: <TasksRfisPage /> },
       { path: 'approvals', element: <ApprovalsESignaturesPage /> },
       { path: 'approvals-e-signatures', element: <ApprovalsESignaturesPage /> },
-      { path: 'reports', element: <ReportsPage /> },
+      { path: 'reports', element: <ReportsAnalyticsPage /> },
       { path: 'admin', element: <AdminDashboardPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],

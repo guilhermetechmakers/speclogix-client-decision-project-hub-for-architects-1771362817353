@@ -31,6 +31,15 @@ export interface ReportMetricOption {
   description?: string
 }
 
+export const REPORT_METRIC_OPTIONS: ReportMetricOption[] = [
+  { id: 'pending_approvals', label: 'Pending approvals', description: 'Count awaiting sign-off' },
+  { id: 'approval_turnaround', label: 'Approval turnaround', description: 'Avg days to approval' },
+  { id: 'overdue_tasks', label: 'Overdue tasks', description: 'Past due items' },
+  { id: 'rfi_count', label: 'RFI count', description: 'Requests for information' },
+  { id: 'change_requests', label: 'Change requests', description: 'Pending changes' },
+  { id: 'workload', label: 'Team workload', description: 'Tasks per member' },
+]
+
 export interface CustomReportFilters {
   projectId?: string
   status?: string
