@@ -28,6 +28,7 @@ import SignupLoginPage from '@/pages/Signup/Login'
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
+  { path: '/admin-dashboard', element: <Navigate to="/dashboard/admin-dashboard" replace /> },
   { path: '/decision-log', element: <Navigate to="/dashboard/decisions" replace /> },
   { path: '/meetings-&-agendas', element: <Navigate to="/dashboard/meetings" replace /> },
   { path: '/reports-&-analytics', element: <Navigate to="/dashboard/reports" replace /> },
@@ -40,6 +41,7 @@ export const router = createBrowserRouter([
   { path: '/help', element: <HelpPage /> },
   { path: '/privacy', element: <PrivacyPage /> },
   { path: '/terms', element: <TermsPage /> },
+  { path: '/admin-dashboard', element: <Navigate to="/dashboard/admin" replace /> },
   {
     path: '/dashboard',
     element: <DashboardLayout />,
@@ -63,6 +65,7 @@ export const router = createBrowserRouter([
       { path: 'approvals-e-signatures', element: <ApprovalsESignaturesPage /> },
       { path: 'reports', element: <ReportsAnalyticsPage /> },
       { path: 'admin', element: <AdminDashboardPage /> },
+      { path: 'admin-dashboard', element: <AdminDashboardPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
   },

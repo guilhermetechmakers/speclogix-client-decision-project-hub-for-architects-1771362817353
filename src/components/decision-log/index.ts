@@ -1,4 +1,4 @@
-export { DecisionList } from './DecisionList'
+export { DecisionList, hasActiveFilters } from './DecisionList'
 export { DecisionCardGrid } from './DecisionCardGrid'
 export { CreateDecisionModal } from './CreateDecisionModal'
 export { DecisionDetailPanel } from './DecisionDetailPanel'

@@ -1,5 +1,13 @@
 /** Admin Dashboard – firm-level admin, billing, security, templates, audit */
 
+/** Dashboard overview stats */
+export interface AdminDashboardStats {
+  active_projects_count: number
+  team_members_count: number
+  pending_approvals_count: number
+  recent_activity_count: number
+}
+
 export interface AdminDashboard {
   id: string
   user_id: string
@@ -26,12 +34,14 @@ export interface SeatUsage {
   used: number
   total: number
   available: number
+  pending_invites?: number
 }
 
 export interface InvitePayload {
   email: string
   role: UserRole
   message?: string
+  full_name?: string
 }
 
 export type BillingPlanId = 'free' | 'team' | 'professional' | 'enterprise'

@@ -4,6 +4,7 @@ import * as api from '@/api/admin-dashboard'
 import type { InvitePayload, SecuritySettings, UserRole } from '@/types/admin-dashboard'
 
 const KEYS = {
+  stats: () => ['admin-dashboard', 'stats'] as const,
   list: () => ['admin-dashboard', 'list'] as const,
   users: () => ['admin-dashboard', 'users'] as const,
   seats: () => ['admin-dashboard', 'seats'] as const,
@@ -15,6 +16,13 @@ const KEYS = {
   archived: () => ['admin-dashboard', 'archived'] as const,
   audit: (params?: Record<string, unknown>) =>
     ['admin-dashboard', 'audit', params ?? {}] as const,
+}
+
+export function useAdminDashboardStats() {
+  return useQuery({
+    queryKey: KEYS.stats(),
+    queryFn: api.fetchAdminDashboardStats,
+  })
 }
 
 export function useAdminDashboardList() {
@@ -83,6 +91,21 @@ export function useDeactivateUser() {
   })
 }
 
+export function useReactivateUser() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (userId: string) => api.reactivateUser(userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.users() })
+      qc.invalidateQueries({ queryKey: KEYS.seats() })
+      toast.success('User reactivated')
+    },
+    onError: (err: { message?: string }) => {
+      toast.error(err.message ?? 'Failed to reactivate user')
+    },
+  })
+}
+
 export function useSubscription() {
   return useQuery({
     queryKey: KEYS.subscription(),
@@ -110,6 +133,7 @@ export function useChangePlan() {
     mutationFn: (planId: string) => api.changePlan(planId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.subscription() })
+      qc.invalidateQueries({ queryKey: KEYS.invoices() })
       toast.success('Plan updated')
     },
     onError: (err: { message?: string }) => {

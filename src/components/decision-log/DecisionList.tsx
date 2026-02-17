@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,9 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DecisionListFilters, DecisionPhase, DecisionStatus } from '@/types/decision-log'
+
+const SEARCH_DEBOUNCE_MS = 300
 
 const PHASES: { value: DecisionPhase | 'all'; label: string }[] = [
   { value: 'all', label: 'All phases' },
@@ -34,19 +36,57 @@ export interface DecisionListProps {
   filters: DecisionListFilters
   onFiltersChange: (f: DecisionListFilters) => void
   approverOptions?: { id: string; name: string }[]
+  /** When set, show a "Clear filters" control and call when user clears */
+  onClearFilters?: () => void
   className?: string
+}
+
+export function hasActiveFilters(f: DecisionListFilters): boolean {
+  return (
+    (f.phase && f.phase !== 'all') ||
+    (f.status && f.status !== 'all') ||
+    (f.approver_id && f.approver_id !== 'all') ||
+    Boolean(f.due_date_from) ||
+    Boolean(f.due_date_to) ||
+    Boolean(f.search?.trim())
+  )
 }
 
 export function DecisionList({
   filters,
   onFiltersChange,
   approverOptions = [],
+  onClearFilters,
   className,
 }: DecisionListProps) {
   const [searchInput, setSearchInput] = useState(filters.search)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const updateFilter = useMemo(
-    () => (key: keyof DecisionListFilters, value: string | undefined) => {
+  const filtersRef = useRef(filters)
+  filtersRef.current = filters
+
+  // Sync local search from parent when filters are reset externally
+  useEffect(() => {
+    setSearchInput(filters.search)
+  }, [filters.search])
+
+  // Debounced search: apply filter after user stops typing (instant feedback)
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      debounceRef.current = null
+      const latest = filtersRef.current
+      if (latest.search !== searchInput) {
+        onFiltersChange({ ...latest, search: searchInput })
+      }
+    }, SEARCH_DEBOUNCE_MS)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [searchInput, onFiltersChange])
+
+  const updateFilter = useCallback(
+    (key: keyof DecisionListFilters, value: string | undefined) => {
       onFiltersChange({ ...filters, [key]: value as DecisionListFilters[keyof DecisionListFilters] })
     },
     [filters, onFiltersChange]
@@ -54,8 +94,31 @@ export function DecisionList({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
     updateFilter('search', searchInput)
   }
+
+  const handleClearFilters = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+      debounceRef.current = null
+    }
+    setSearchInput('')
+    onFiltersChange({
+      phase: 'all',
+      status: 'all',
+      approver_id: 'all',
+      search: '',
+      due_date_from: undefined,
+      due_date_to: undefined,
+    })
+    onClearFilters?.()
+  }, [onFiltersChange, onClearFilters])
+
+  const activeFilters = hasActiveFilters(filters)
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -147,6 +210,18 @@ export function DecisionList({
             aria-label="Due date to"
           />
         </fieldset>
+        {onClearFilters && activeFilters && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleClearFilters}
+            className="shrink-0 text-muted-foreground hover:text-foreground transition-colors duration-200 hover:scale-[1.02] active:scale-[0.98] min-h-[44px]"
+            aria-label="Clear all filters"
+          >
+            <X className="h-4 w-4 mr-1" /> Clear filters
+          </Button>
+        )}
         </form>
       </div>
     </div>

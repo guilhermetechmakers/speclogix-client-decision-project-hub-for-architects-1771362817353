@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { DecisionList } from '@/components/decision-log/DecisionList'
+import { DecisionList, hasActiveFilters } from '@/components/decision-log/DecisionList'
 import { DecisionCardGrid } from '@/components/decision-log/DecisionCardGrid'
 import { CreateDecisionModal } from '@/components/decision-log/CreateDecisionModal'
 import { DecisionDetailPanel } from '@/components/decision-log/DecisionDetailPanel'
@@ -249,6 +249,7 @@ export function DecisionLogPage() {
           filters={filters}
           onFiltersChange={setFilters}
           approverOptions={approverOptions}
+          onClearFilters={() => setFilters(defaultFilters)}
         />
 
         {selectedIds.length > 0 && (
@@ -311,16 +312,34 @@ export function DecisionLogPage() {
               <div className="rounded-2xl bg-muted/50 p-6 mb-4">
                 <ClipboardList className="h-14 w-14 text-muted-foreground" aria-hidden />
               </div>
-              <h3 className="text-lg font-semibold">No decisions yet</h3>
-              <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
-                Create your first decision to share options, attach media and cost impacts, and capture client approvals.
-              </p>
-              <Button
-                className="mt-6 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                onClick={() => setCreateOpen(true)}
-              >
-                Create decision
-              </Button>
+              {hasActiveFilters(filters) ? (
+                <>
+                  <h3 className="text-lg font-semibold">No decisions match your filters</h3>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
+                    Try clearing filters or changing phase, status, approver, or due date to see more results.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-6 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    onClick={() => setFilters(defaultFilters)}
+                  >
+                    Clear filters
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-lg font-semibold">No decisions yet</h3>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
+                    Create your first decision to share options, attach media and cost impacts, and capture client approvals.
+                  </p>
+                  <Button
+                    className="mt-6 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    onClick={() => setCreateOpen(true)}
+                  >
+                    Create decision
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
         )}

@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Menu,
   User,
+  ShieldCheck,
 } from 'lucide-react'
 
 const SIDEBAR_COLLAPSED_KEY = 'speclogix-sidebar-collapsed'
@@ -37,6 +38,7 @@ const mainNav = [
   { to: '/dashboard/tasks', label: 'Tasks & RFIs', icon: CheckSquare },
   { to: '/dashboard/approvals', label: 'Approvals & E-sign', icon: PenTool },
   { to: '/dashboard/reports', label: 'Reports & Analytics', icon: BarChart3 },
+  { to: '/dashboard/admin-dashboard', label: 'Admin & Billing', icon: ShieldCheck },
 ]
 
 const bottomNav = [

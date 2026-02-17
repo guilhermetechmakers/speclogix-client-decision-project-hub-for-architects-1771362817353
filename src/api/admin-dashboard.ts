@@ -1,6 +1,7 @@
 import { api } from '@/lib/api'
 import type {
   AdminDashboard,
+  AdminDashboardStats,
   AdminUser,
   SeatUsage,
   InvitePayload,
@@ -14,6 +15,19 @@ import type {
 } from '@/types/admin-dashboard'
 
 const BASE = '/admin-dashboard'
+
+export async function fetchAdminDashboardStats(): Promise<AdminDashboardStats> {
+  try {
+    return await api.get<AdminDashboardStats>(`${BASE}/stats`)
+  } catch {
+    return {
+      active_projects_count: 0,
+      team_members_count: 0,
+      pending_approvals_count: 0,
+      recent_activity_count: 0,
+    }
+  }
+}
 
 export async function fetchAdminDashboardList(): Promise<AdminDashboard[]> {
   try {
@@ -55,6 +69,10 @@ export async function deactivateUser(userId: string): Promise<void> {
   return api.post<void>(`${BASE}/users/${userId}/deactivate`, {})
 }
 
+export async function reactivateUser(userId: string): Promise<void> {
+  return api.post<void>(`${BASE}/users/${userId}/reactivate`, {})
+}
+
 /** Billing & subscription */
 export async function fetchSubscription(): Promise<Subscription | null> {
   try {
@@ -87,7 +105,7 @@ export async function changePlan(planId: string): Promise<Subscription> {
 /** Security settings */
 export async function fetchSecuritySettings(): Promise<SecuritySettings> {
   try {
-    return await api.get<SecuritySettings>(`${BASE}/security`)
+    return await api.get<SecuritySettings>(`${BASE}/security/settings`)
   } catch {
     return {
       sso_enabled: false,
@@ -102,7 +120,7 @@ export async function fetchSecuritySettings(): Promise<SecuritySettings> {
 export async function updateSecuritySettings(
   data: Partial<SecuritySettings>
 ): Promise<SecuritySettings> {
-  return api.patch<SecuritySettings>(`${BASE}/security`, data)
+  return api.patch<SecuritySettings>(`${BASE}/security/settings`, data)
 }
 
 /** Templates & projects */
