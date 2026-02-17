@@ -11,7 +11,7 @@ import { ProjectOverviewPage } from '@/pages/project-overview'
 import { DecisionLogPage } from '@/pages/decision-log'
 import { FilesDrawingsPage } from '@/pages/files-drawings'
 import { MessagesPage } from '@/pages/messages'
-import { MeetingsPage } from '@/pages/meetings'
+import MeetingsAgendasPage from '@/pages/MeetingsAgendas'
 import { TemplatesPage } from '@/pages/templates'
 import TemplatesWorkflowLibraryPage from '@/pages/TemplatesWorkflowLibrary'
 import { TasksRfisPage } from '@/pages/tasks-rfis'
@@ -29,6 +29,7 @@ import SignupLoginPage from '@/pages/Signup/Login'
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
   { path: '/decision-log', element: <Navigate to="/dashboard/decisions" replace /> },
+  { path: '/meetings-&-agendas', element: <Navigate to="/dashboard/meetings" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <LoginPage /> },
   { path: '/signup-/-login', element: <SignupLoginPage /> },
@@ -52,7 +53,8 @@ export const router = createBrowserRouter([
       { path: 'decisions/:decisionId', element: <DecisionLogPage /> },
       { path: 'files', element: <FilesDrawingsPage /> },
       { path: 'messages', element: <MessagesPage /> },
-      { path: 'meetings', element: <MeetingsPage /> },
+      { path: 'meetings', element: <MeetingsAgendasPage /> },
+      { path: 'meetings-agendas', element: <MeetingsAgendasPage /> },
       { path: 'templates', element: <TemplatesPage /> },
       { path: 'templates-workflow-library', element: <TemplatesWorkflowLibraryPage /> },
       { path: 'tasks', element: <TasksRfisPage /> },
