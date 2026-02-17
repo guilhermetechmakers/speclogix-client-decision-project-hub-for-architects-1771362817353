@@ -148,6 +148,7 @@ export function LandingPage() {
         <div className="container mx-auto max-w-1280 px-6 flex flex-wrap items-center justify-between gap-4">
           <span className="text-sm text-muted-foreground">© SpecLogix. Client decision & project hub for architects.</span>
           <div className="flex gap-6">
+            <Link to="/signup-/-login" className="text-sm text-muted-foreground hover:text-foreground">Sign in / Sign up</Link>
             <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
             <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground">Terms</Link>
             <Link to="/help" className="text-sm text-muted-foreground hover:text-foreground">Help</Link>

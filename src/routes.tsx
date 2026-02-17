@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { DashboardLayout } from '@/layouts/dashboard-layout'
 import { LandingPage } from '@/pages/landing'
 import { LoginPage } from '@/pages/login'
@@ -23,11 +23,14 @@ import { HelpPage } from '@/pages/help'
 import { PrivacyPage } from '@/pages/privacy'
 import { TermsPage } from '@/pages/terms'
 import { NotFoundPage } from '@/pages/not-found'
+import SignupLoginPage from '@/pages/Signup/Login'
 
 export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
+  { path: '/decision-log', element: <Navigate to="/dashboard/decisions" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <LoginPage /> },
+  { path: '/signup-/-login', element: <SignupLoginPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/client-access', element: <ClientAccessPage /> },
   { path: '/pricing', element: <PricingPage /> },

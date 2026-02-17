@@ -1,154 +1,255 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useMemo, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { DecisionList } from '@/components/decision-log/DecisionList'
+import { DecisionCardGrid } from '@/components/decision-log/DecisionCardGrid'
+import { CreateDecisionModal } from '@/components/decision-log/CreateDecisionModal'
+import { DecisionDetailPanel } from '@/components/decision-log/DecisionDetailPanel'
+import { VersioningView } from '@/components/decision-log/VersioningView'
+import { BulkActions } from '@/components/decision-log/BulkActions'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Plus, ClipboardList } from 'lucide-react'
+import type { DecisionListFilters } from '@/types/decision-log'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Plus, Search, MoreHorizontal, MessageSquare, CheckCircle2, Calendar, ClipboardList } from 'lucide-react'
-import { cn } from '@/lib/utils'
+  useDecisions,
+  useDecision,
+  useCreateDecision,
+  useApproveDecision,
+  useRequestChangesDecision,
+  useAddComment,
+  useSignDecision,
+  useBulkRemindApprovers,
+  useBulkChangePhase,
+} from '@/hooks/use-decision-log'
+import { bulkExportHistory } from '@/api/decision-log'
 
-const mockDecisions = [
-  { id: '1', title: 'Fixture package A', status: 'pending', dueDate: '2025-02-20', projectName: 'Riverside Residence', recommended: 'Option A' },
-  { id: '2', title: 'Kitchen layout', status: 'approved', dueDate: '2025-02-18', projectName: 'Riverside Residence', recommended: 'Layout B' },
-  { id: '3', title: 'Exterior finish', status: 'draft', dueDate: '—', projectName: 'Downtown Office', recommended: '—' },
-]
-
-const statusVariant: Record<string, 'default' | 'secondary' | 'success' | 'warning' | 'destructive'> = {
-  draft: 'secondary',
-  pending: 'warning',
-  approved: 'success',
-  rejected: 'destructive',
+const defaultFilters: DecisionListFilters = {
+  phase: 'all',
+  status: 'all',
+  approver_id: 'all',
+  search: '',
 }
 
 export function DecisionLogPage() {
-  const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<string>('all')
+  const { decisionId } = useParams<{ decisionId: string }>()
+  const navigate = useNavigate()
+  const isNew = decisionId === 'new'
+  const [filters, setFilters] = useState<DecisionListFilters>(defaultFilters)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Decision Log</h1>
-          <p className="text-muted-foreground mt-1">Publish and track decisions with options and approvals.</p>
-        </div>
-        <Button asChild>
-          <Link to="/dashboard/decisions/new">
-            <Plus className="h-4 w-4 mr-2" /> Create decision
-          </Link>
-        </Button>
-      </div>
+  const { data: decisions = [], isLoading: listLoading, error: listError } = useDecisions(filters)
+  const { data: decision, isLoading: detailLoading, error: detailError } = useDecision(
+    decisionId && !isNew ? decisionId : undefined
+  )
 
-      <div className="flex flex-wrap gap-4">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search decisions…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              Status: {filter === 'all' ? 'All' : filter}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {['all', 'draft', 'pending', 'approved'].map((f) => (
-              <DropdownMenuItem key={f} onClick={() => setFilter(f)}>
-                {f.charAt(0).toUpperCase() + f.slice(1)}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+  const createMutation = useCreateDecision()
+  const approveMutation = useApproveDecision(decisionId ?? '')
+  const requestChangesMutation = useRequestChangesDecision(decisionId ?? '')
+  const addCommentMutation = useAddComment(decisionId ?? '')
+  const signMutation = useSignDecision(decisionId ?? '')
+  const remindMutation = useBulkRemindApprovers()
+  const changePhaseMutation = useBulkChangePhase()
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {mockDecisions.map((d) => (
-          <Card
-            key={d.id}
-            className={cn(
-              'group transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5'
-            )}
-          >
-            <CardHeader className="pb-2">
-              <div className="aspect-video rounded-md bg-muted mb-2" />
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-base">
-                  <Link
-                    to={`/dashboard/decisions/${d.id}`}
-                    className="hover:text-primary hover:underline"
-                  >
-                    {d.title}
-                  </Link>
-                </CardTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" className="shrink-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                      <Link to={`/dashboard/decisions/${d.id}`}>View</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Archive</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <p className="text-xs text-muted-foreground">{d.projectName}</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={statusVariant[d.status as keyof typeof statusVariant] ?? 'secondary'}>{d.status}</Badge>
-                {d.recommended !== '—' && (
-                  <span className="text-xs text-muted-foreground">Recommended: {d.recommended}</span>
-                )}
-              </div>
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5" /> Due {d.dueDate}
-                </span>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon-sm" title="Comments">
-                    <MessageSquare className="h-4 w-4" />
-                  </Button>
-                  {d.status === 'pending' && (
-                    <Button variant="ghost" size="icon-sm" title="Approve" asChild>
-                      <Link to={`/dashboard/decisions/${d.id}/approve`}>
-                        <CheckCircle2 className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
+  useEffect(() => {
+    if (isNew) document.title = 'New decision — Decision Log | SpecLogix'
+    else if (decision?.title) document.title = `${decision.title} — Decision Log | SpecLogix`
+    else document.title = 'Decision Log | SpecLogix'
+    return () => { document.title = 'SpecLogix' }
+  }, [isNew, decision?.title])
+
+  const approverOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    decisions.forEach((d) => {
+      if (d.approver_id && d.approver_name) seen.set(d.approver_id, d.approver_name)
+    })
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }))
+  }, [decisions])
+
+  const handleCreateSubmit = (data: Parameters<typeof createMutation.mutate>[0]) => {
+    createMutation.mutate(
+      {
+        title: data.title,
+        description: data.description,
+        summary: data.summary,
+        phase: data.phase,
+        approver_email: data.approver_email || undefined,
+        due_date: data.due_date || undefined,
+        options: data.options.map((o) => ({
+          title: o.title,
+          description: o.description,
+          media_urls: o.media_urls,
+          cost_impacts: o.cost_impacts,
+        })),
+        recommended_option_index: data.recommended_option_index,
+      },
+      {
+        onSuccess: (created) => {
+          setCreateOpen(false)
+          navigate(`/dashboard/decisions/${created.id}`)
+        },
+      }
+    )
+  }
+
+  const handleExportHistory = (ids: string[]) => {
+    bulkExportHistory(ids)
+      .then((blob) => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `decision-history-${Date.now()}.pdf`
+        a.click()
+        URL.revokeObjectURL(url)
+      })
+      .catch(() => {})
+  }
+
+  // Detail view: single decision
+  if (decisionId && !isNew && (decision || detailLoading || detailError)) {
+    return (
+      <>
+        {detailLoading && (
+          <div className="space-y-4 animate-fade-in">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        )}
+        {detailError && (
+          <Card className="border-destructive/50">
+            <CardContent className="py-8 text-center">
+              <p className="text-destructive font-medium">Failed to load decision.</p>
+              <Button variant="outline" className="mt-2" onClick={() => navigate('/dashboard/decisions')}>
+                Back to list
+              </Button>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        )}
+        {decision && !detailLoading && (
+          <div className="space-y-6">
+            <DecisionDetailPanel
+              decision={decision}
+              onApprove={(optionId) => approveMutation.mutate(optionId)}
+              onRequestChanges={(comment) => requestChangesMutation.mutate(comment)}
+              onAddComment={(body) => addCommentMutation.mutate(body)}
+              onSign={decision.status === 'approved' && !decision.signed_at ? () => signMutation.mutate() : undefined}
+              isApproving={approveMutation.isPending}
+              isRequestingChanges={requestChangesMutation.isPending}
+              isAddingComment={addCommentMutation.isPending}
+              isSigning={signMutation.isPending}
+            />
+            {decision.versions && decision.versions.length > 0 && (
+              <VersioningView
+                versions={decision.versions}
+                decisionId={decision.id}
+                decisionTitle={decision.title}
+                onExportPdf={() => {}}
+              />
+            )}
+          </div>
+        )}
+      </>
+    )
+  }
 
-      {mockDecisions.length === 0 && (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <ClipboardList className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="font-semibold">No decisions yet</h3>
-            <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-              Create your first decision to share options and capture client approvals.
+  // New decision: open create modal and redirect after
+  if (isNew) {
+    return (
+      <>
+        <CreateDecisionModal
+          open={true}
+          onOpenChange={(open) => !open && navigate('/dashboard/decisions')}
+          onSubmit={handleCreateSubmit}
+          isSubmitting={createMutation.isPending}
+        />
+      </>
+    )
+  }
+
+  // List view
+  return (
+    <>
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Decision Log</h1>
+            <p className="text-muted-foreground mt-1">
+              Publish comparison cards for client choices. Track options, approvals, and e-sign.
             </p>
-            <Button asChild className="mt-4">
-              <Link to="/dashboard/decisions/new">Create decision</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+          </div>
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" /> Create decision
+          </Button>
+        </div>
+
+        <DecisionList
+          filters={filters}
+          onFiltersChange={setFilters}
+          approverOptions={approverOptions}
+        />
+
+        {selectedIds.length > 0 && (
+          <BulkActions
+            selectedIds={selectedIds}
+            onClearSelection={() => setSelectedIds([])}
+            onRemindApprovers={(ids) => remindMutation.mutate(ids)}
+            onExportHistory={handleExportHistory}
+            onChangePhase={(ids, phase) => changePhaseMutation.mutate({ ids, phase })}
+            isReminding={remindMutation.isPending}
+            isExporting={false}
+            isChangingPhase={changePhaseMutation.isPending}
+          />
+        )}
+
+        {listLoading && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48 rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {listError && (
+          <Card className="border-destructive/50">
+            <CardContent className="py-6 text-center">
+              <p className="text-destructive font-medium">Failed to load decisions.</p>
+              <p className="text-sm text-muted-foreground mt-1">You can still create a new decision.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!listLoading && !listError && decisions.length > 0 && (
+          <DecisionCardGrid
+            decisions={decisions}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+          />
+        )}
+
+        {!listLoading && !listError && decisions.length === 0 && (
+          <Card className="border-dashed">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <ClipboardList className="h-12 w-12 text-muted-foreground mb-4" aria-hidden />
+              <h3 className="font-semibold">No decisions yet</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+                Create your first decision to share options and capture client approvals.
+              </p>
+              <Button className="mt-4" onClick={() => setCreateOpen(true)}>
+                Create decision
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <CreateDecisionModal
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          onSubmit={handleCreateSubmit}
+          isSubmitting={createMutation.isPending}
+        />
+      </div>
+    </>
   )
 }
