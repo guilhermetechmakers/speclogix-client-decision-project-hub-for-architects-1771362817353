@@ -13,6 +13,7 @@ import { FilesDrawingsPage } from '@/pages/files-drawings'
 import { MessagesPage } from '@/pages/messages'
 import { MeetingsPage } from '@/pages/meetings'
 import { TemplatesPage } from '@/pages/templates'
+import TemplatesWorkflowLibraryPage from '@/pages/TemplatesWorkflowLibrary'
 import { TasksRfisPage } from '@/pages/tasks-rfis'
 import { ApprovalsPage } from '@/pages/approvals'
 import { ReportsPage } from '@/pages/reports'
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
       { path: 'messages', element: <MessagesPage /> },
       { path: 'meetings', element: <MeetingsPage /> },
       { path: 'templates', element: <TemplatesPage /> },
+      { path: 'templates-workflow-library', element: <TemplatesWorkflowLibraryPage /> },
       { path: 'tasks', element: <TasksRfisPage /> },
       { path: 'approvals', element: <ApprovalsPage /> },
       { path: 'reports', element: <ReportsPage /> },
