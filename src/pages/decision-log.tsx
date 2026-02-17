@@ -53,11 +53,25 @@ export function DecisionLogPage() {
   const changePhaseMutation = useBulkChangePhase()
 
   useEffect(() => {
-    if (isNew) document.title = 'New decision — Decision Log | SpecLogix'
-    else if (decision?.title) document.title = `${decision.title} — Decision Log | SpecLogix`
-    else document.title = 'Decision Log | SpecLogix'
-    return () => { document.title = 'SpecLogix' }
-  }, [isNew, decision?.title])
+    if (isNew) {
+      document.title = 'New decision — Decision Log | SpecLogix'
+    } else if (decision?.title) {
+      document.title = `${decision.title} — Decision Log | SpecLogix`
+    } else {
+      document.title = 'Decision Log | SpecLogix'
+    }
+    const metaDesc = document.querySelector('meta[name="description"]')
+    if (metaDesc) {
+      const value =
+        decision?.title || decision?.summary
+          ? `Decision: ${decision.title ?? ''}${decision.summary ? ` — ${decision.summary}` : ''}. SpecLogix client decision and project hub.`
+          : 'Create and track client decision comparison cards, approvals, and e-sign. SpecLogix.'
+      metaDesc.setAttribute('content', value)
+    }
+    return () => {
+      document.title = 'SpecLogix'
+    }
+  }, [isNew, decision?.title, decision?.summary])
 
   const approverOptions = useMemo(() => {
     const seen = new Map<string, string>()

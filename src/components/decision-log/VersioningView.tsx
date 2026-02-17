@@ -31,6 +31,9 @@ export function VersioningView({
   const sortedVersions = [...versions].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   )
+  const previousVersion = selectedVersion
+    ? sortedVersions[sortedVersions.findIndex((v) => v.id === selectedVersion.id) + 1] ?? null
+    : null
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -65,7 +68,7 @@ export function VersioningView({
                 ))}
               </div>
               {selectedVersion && (
-                <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-sm">
+                <div className="rounded-xl border border-border bg-muted/30 p-4 shadow-sm transition-shadow duration-200 hover:shadow-md">
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <Badge variant="secondary" className="font-normal">
                       Version {selectedVersion.version_number} ·{' '}
@@ -83,8 +86,16 @@ export function VersioningView({
                       </Button>
                     )}
                   </div>
+                  {previousVersion && (
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Changes from v{previousVersion.version_number} (diff highlights below)
+                    </p>
+                  )}
                   <div className="text-sm prose prose-sm max-w-none dark:prose-invert rounded-lg bg-background/50 p-3 border border-border/50">
-                    <VersionDiffHighlight snapshot={selectedVersion.snapshot} />
+                    <VersionDiffHighlight
+                      snapshot={selectedVersion.snapshot}
+                      previousSnapshot={previousVersion?.snapshot}
+                    />
                   </div>
                 </div>
               )}
@@ -107,27 +118,77 @@ export function VersioningView({
   )
 }
 
-function VersionDiffHighlight({ snapshot }: { snapshot: Record<string, unknown> }) {
+function VersionDiffHighlight({
+  snapshot,
+  previousSnapshot,
+}: {
+  snapshot: Record<string, unknown>
+  previousSnapshot?: Record<string, unknown>
+}) {
   const title = (snapshot.title as string) ?? '—'
   const description = (snapshot.description as string) ?? ''
   const options = (snapshot.options as Array<{ title?: string; description?: string }>) ?? []
+  const prevTitle = previousSnapshot ? ((previousSnapshot.title as string) ?? '') : null
+  const prevDescription = previousSnapshot ? ((previousSnapshot.description as string) ?? '') : null
+  const prevOptions = (previousSnapshot?.options as Array<{ title?: string; description?: string }>) ?? []
+
+  const titleChanged = prevTitle !== null && prevTitle !== title
+  const descChanged = prevDescription !== null && prevDescription !== description
+
   return (
     <div className="space-y-3">
-      <p className="rounded px-1.5 py-0.5 bg-primary/5 border-l-2 border-primary/50">
-        <strong className="text-foreground">Title:</strong> <span className="text-foreground">{title}</span>
+      <p
+        className={cn(
+          'rounded px-1.5 py-0.5 border-l-2',
+          titleChanged ? 'bg-[hsl(var(--success))]/10 border-[hsl(var(--success))]/50' : 'bg-primary/5 border-primary/50'
+        )}
+      >
+        <strong className="text-foreground">Title:</strong>{' '}
+        <span className="text-foreground">{title}</span>
+        {titleChanged && prevTitle && (
+          <span className="block mt-1 text-xs text-muted-foreground line-through">{prevTitle}</span>
+        )}
       </p>
-      {description && (
-        <p className="rounded px-1.5 py-0.5 bg-muted/50 border-l-2 border-muted-foreground/30">
-          <strong className="text-foreground">Description:</strong> <span className="text-muted-foreground">{description}</span>
+      {(description || descChanged) && (
+        <p
+          className={cn(
+            'rounded px-1.5 py-0.5 border-l-2',
+            descChanged ? 'bg-[hsl(var(--success))]/10 border-[hsl(var(--success))]/50' : 'bg-muted/50 border-muted-foreground/30'
+          )}
+        >
+          <strong className="text-foreground">Description:</strong>{' '}
+          <span className="text-muted-foreground">{description || '—'}</span>
+          {descChanged && prevDescription && (
+            <span className="block mt-1 text-xs text-muted-foreground line-through">{prevDescription}</span>
+          )}
         </p>
       )}
       {options.length > 0 && (
         <div className="rounded px-1.5 py-0.5 bg-muted/30 border-l-2 border-border">
           <strong className="text-foreground">Options:</strong>
           <ul className="list-disc pl-5 mt-1 space-y-0.5">
-            {options.map((o, i) => (
-              <li key={i} className="text-foreground">{o.title ?? 'Untitled'} {o.description && <span className="text-muted-foreground">— {o.description}</span>}</li>
-            ))}
+            {options.map((o, i) => {
+              const prevO = prevOptions[i]
+              const optChanged = prevO && (prevO.title !== (o.title ?? '') || prevO.description !== (o.description ?? ''))
+              return (
+                <li
+                  key={i}
+                  className={cn(
+                    'text-foreground',
+                    optChanged && 'rounded bg-[hsl(var(--success))]/10 px-1 -mx-1'
+                  )}
+                >
+                  {o.title ?? 'Untitled'}
+                  {o.description && <span className="text-muted-foreground"> — {o.description}</span>}
+                  {optChanged && prevO && (
+                    <span className="block text-xs text-muted-foreground line-through mt-0.5">
+                      {prevO.title ?? 'Untitled'}
+                      {prevO.description && ` — ${prevO.description}`}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </div>
       )}

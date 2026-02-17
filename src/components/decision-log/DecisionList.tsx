@@ -129,23 +129,24 @@ export function DecisionList({
             </SelectContent>
           </Select>
         )}
-        <div className="flex items-center gap-2">
+        <fieldset className="flex items-center gap-2" aria-label="Due date range">
+          <legend className="sr-only">Due date range</legend>
           <Input
             type="date"
-            className="w-[140px]"
+            className="w-[140px] transition-[border-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-ring"
             value={filters.due_date_from ?? ''}
             onChange={(e) => updateFilter('due_date_from', e.target.value || undefined)}
             aria-label="Due date from"
           />
-          <span className="text-muted-foreground text-sm">–</span>
+          <span className="text-muted-foreground text-sm" aria-hidden>–</span>
           <Input
             type="date"
-            className="w-[140px]"
+            className="w-[140px] transition-[border-color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-ring"
             value={filters.due_date_to ?? ''}
             onChange={(e) => updateFilter('due_date_to', e.target.value || undefined)}
             aria-label="Due date to"
           />
-        </div>
+        </fieldset>
         </form>
       </div>
     </div>

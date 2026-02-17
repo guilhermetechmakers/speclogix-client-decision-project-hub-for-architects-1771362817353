@@ -21,9 +21,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Trash2, Upload, ArrowRight, ArrowLeft } from 'lucide-react'
+import { Plus, Trash2, Upload, ArrowRight, ArrowLeft, Link2, DollarSign } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DecisionPhase } from '@/types/decision-log'
+
+const costImpactSchema = z.object({
+  label: z.string(),
+  amount_cents: z.number(),
+  currency: z.string().min(1),
+})
 
 const stepSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -37,15 +43,7 @@ const stepSchema = z.object({
       title: z.string().min(1, 'Option title required'),
       description: z.string().optional(),
       media_urls: z.array(z.string()).optional(),
-      cost_impacts: z
-        .array(
-          z.object({
-            label: z.string(),
-            amount_cents: z.number(),
-            currency: z.string(),
-          })
-        )
-        .optional(),
+      cost_impacts: z.array(costImpactSchema).optional(),
     })
   ).min(1, 'Add at least one option'),
   recommended_option_index: z.number().min(0).optional(),
@@ -91,15 +89,15 @@ export function CreateDecisionModal({
       phase: 'design',
       approver_email: '',
       due_date: '',
-      options: [{ title: '', description: '' }],
+      options: [{ title: '', description: '', media_urls: [], cost_impacts: [] }],
       recommended_option_index: 0,
     },
   })
 
-  const options = watch('options') ?? [{ title: '', description: '' }]
+  const options = watch('options') ?? [{ title: '', description: '', media_urls: [], cost_impacts: [] }]
 
   const addOption = () => {
-    setValue('options', [...options, { title: '', description: '' }], { shouldValidate: true })
+    setValue('options', [...options, { title: '', description: '', media_urls: [], cost_impacts: [] }], { shouldValidate: true })
   }
 
   const removeOption = (index: number) => {
@@ -109,6 +107,50 @@ export function CreateDecisionModal({
       options.filter((_, i) => i !== index),
       { shouldValidate: true }
     )
+  }
+
+  const addMediaUrl = (optionIndex: number) => {
+    const opts = [...(watch('options') ?? [])]
+    const urls = [...(opts[optionIndex]?.media_urls ?? []), '']
+    opts[optionIndex] = { ...opts[optionIndex], media_urls: urls }
+    setValue('options', opts, { shouldValidate: true })
+  }
+
+  const setMediaUrl = (optionIndex: number, urlIndex: number, value: string) => {
+    const opts = [...(watch('options') ?? [])]
+    const urls = [...(opts[optionIndex]?.media_urls ?? [])]
+    urls[urlIndex] = value
+    opts[optionIndex] = { ...opts[optionIndex], media_urls: urls }
+    setValue('options', opts, { shouldValidate: true })
+  }
+
+  const removeMediaUrl = (optionIndex: number, urlIndex: number) => {
+    const opts = [...(watch('options') ?? [])]
+    const urls = (opts[optionIndex]?.media_urls ?? []).filter((_, i) => i !== urlIndex)
+    opts[optionIndex] = { ...opts[optionIndex], media_urls: urls }
+    setValue('options', opts, { shouldValidate: true })
+  }
+
+  const addCostImpact = (optionIndex: number) => {
+    const opts = [...(watch('options') ?? [])]
+    const impacts = [...(opts[optionIndex]?.cost_impacts ?? []), { label: '', amount_cents: 0, currency: 'USD' }]
+    opts[optionIndex] = { ...opts[optionIndex], cost_impacts: impacts }
+    setValue('options', opts, { shouldValidate: true })
+  }
+
+  const setCostImpact = (optionIndex: number, impactIndex: number, field: 'label' | 'amount_cents' | 'currency', value: string | number) => {
+    const opts = [...(watch('options') ?? [])]
+    const impacts = [...(opts[optionIndex]?.cost_impacts ?? [])]
+    impacts[impactIndex] = { ...impacts[impactIndex], [field]: value }
+    opts[optionIndex] = { ...opts[optionIndex], cost_impacts: impacts }
+    setValue('options', opts, { shouldValidate: true })
+  }
+
+  const removeCostImpact = (optionIndex: number, impactIndex: number) => {
+    const opts = [...(watch('options') ?? [])]
+    const impacts = (opts[optionIndex]?.cost_impacts ?? []).filter((_, i) => i !== impactIndex)
+    opts[optionIndex] = { ...opts[optionIndex], cost_impacts: impacts }
+    setValue('options', opts, { shouldValidate: true })
   }
 
   const onNext = async () => {
@@ -125,6 +167,12 @@ export function CreateDecisionModal({
     onSubmit({
       ...data,
       recommended_option_index: data.recommended_option_index ?? 0,
+      options: data.options.map((o) => ({
+        title: o.title,
+        description: o.description,
+        media_urls: (o.media_urls ?? []).filter((u): u is string => Boolean(u?.trim())),
+        cost_impacts: (o.cost_impacts ?? []).filter((c) => c.label?.trim()).map((c) => ({ label: c.label, amount_cents: c.amount_cents, currency: c.currency })),
+      })),
     })
     onOpenChange(false)
   })
@@ -218,39 +266,128 @@ export function CreateDecisionModal({
               </div>
               <div>
                 <div className="flex items-center justify-between">
-                  <Label>Options (add titles; upload images/PDFs in next step)</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={addOption}>
+                  <Label>Options — add titles, media URLs (images/PDFs), and cost impacts</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addOption} className="transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98]">
                     <Plus className="h-4 w-4 mr-1" /> Add option
                   </Button>
                 </div>
                 {errors.options && (
                   <p className="text-sm text-destructive mt-1">{errors.options.message}</p>
                 )}
-                <ul className="mt-2 space-y-3">
-                  {options.map((_, i) => (
-                    <li key={i} className="flex gap-2 items-start">
-                      <Input
-                        {...register(`options.${i}.title`)}
-                        placeholder={`Option ${i + 1} title`}
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="shrink-0"
-                        onClick={() => removeOption(i)}
-                        disabled={options.length <= 1}
-                        aria-label="Remove option"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                <ul className="mt-2 space-y-4">
+                  {options.map((opt, i) => (
+                    <li key={i} className="rounded-lg border border-border bg-muted/20 p-3 space-y-3">
+                      <div className="flex gap-2 items-start">
+                        <Input
+                          {...register(`options.${i}.title`)}
+                          placeholder={`Option ${i + 1} title`}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="shrink-0 min-w-[44px] min-h-[44px]"
+                          onClick={() => removeOption(i)}
+                          disabled={options.length <= 1}
+                          aria-label="Remove option"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="pl-2 space-y-2 border-l-2 border-primary/20">
+                        <div>
+                          <div className="flex items-center gap-1 mb-1">
+                            <Link2 className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                            <span className="text-xs font-medium text-muted-foreground">Media URLs (images/PDFs)</span>
+                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => addMediaUrl(i)}>
+                              Add URL
+                            </Button>
+                          </div>
+                          {(opt.media_urls ?? []).length === 0 ? (
+                            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => addMediaUrl(i)}>
+                              <Upload className="h-3 w-3 mr-1" /> Add image or PDF URL
+                            </Button>
+                          ) : (
+                            <ul className="space-y-1">
+                              {(opt.media_urls ?? []).map((_, uIdx) => (
+                                <li key={uIdx} className="flex gap-1">
+                                  <Input
+                                    placeholder="https://..."
+                                    value={(opt.media_urls ?? [])[uIdx] ?? ''}
+                                    onChange={(e) => setMediaUrl(i, uIdx, e.target.value)}
+                                    className="text-sm h-8"
+                                  />
+                                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeMediaUrl(i, uIdx)} aria-label="Remove URL">
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </li>
+                              ))}
+                              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => addMediaUrl(i)}>
+                                <Plus className="h-3 w-3 mr-1" /> Add another URL
+                              </Button>
+                            </ul>
+                          )}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1 mb-1">
+                            <DollarSign className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+                            <span className="text-xs font-medium text-muted-foreground">Cost impacts</span>
+                            <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={() => addCostImpact(i)}>
+                              Add line
+                            </Button>
+                          </div>
+                          {(opt.cost_impacts ?? []).length === 0 ? (
+                            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => addCostImpact(i)}>
+                              <DollarSign className="h-3 w-3 mr-1" /> Add cost impact
+                            </Button>
+                          ) : (
+                            <ul className="space-y-2">
+                              {(opt.cost_impacts ?? []).map((c, cIdx) => (
+                                <li key={cIdx} className="flex flex-wrap items-center gap-2">
+                                  <Input
+                                    placeholder="Label"
+                                    value={c.label}
+                                    onChange={(e) => setCostImpact(i, cIdx, 'label', e.target.value)}
+                                    className="w-28 text-sm h-8"
+                                  />
+                                  <Input
+                                    type="number"
+                                    placeholder="Amount ($)"
+                                    step="0.01"
+                                    min="0"
+                                    value={c.amount_cents ? (c.amount_cents / 100).toFixed(2) : ''}
+                                    onChange={(e) => setCostImpact(i, cIdx, 'amount_cents', Math.round((parseFloat(e.target.value) || 0) * 100))}
+                                    className="w-24 text-sm h-8"
+                                  />
+                                  <Select
+                                    value={c.currency ?? 'USD'}
+                                    onValueChange={(v) => setCostImpact(i, cIdx, 'currency', v)}
+                                  >
+                                    <SelectTrigger className="w-20 h-8 text-sm">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="USD">USD</SelectItem>
+                                      <SelectItem value="EUR">EUR</SelectItem>
+                                      <SelectItem value="GBP">GBP</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeCostImpact(i, cIdx)} aria-label="Remove cost line">
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </li>
+                              ))}
+                              <Button type="button" variant="ghost" size="sm" className="text-xs" onClick={() => addCostImpact(i)}>
+                                <Plus className="h-3 w-3 mr-1" /> Add another
+                              </Button>
+                            </ul>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs text-muted-foreground mt-2">
-                  You can attach images/PDFs and cost impacts when editing the decision after creation.
-                </p>
               </div>
             </div>
           )}
@@ -296,7 +433,7 @@ export function CreateDecisionModal({
               </div>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Upload className="h-3.5 w-3.5" />
-                File uploads for options can be added after creation via the decision detail page.
+                You can add more media or cost lines after creation in the decision detail view.
               </p>
             </div>
           )}
