@@ -41,12 +41,14 @@ import {
   useInviteUser,
   useUpdateUserRole,
   useDeactivateUser,
+  useReactivateUser,
   useSeatUsage,
 } from '@/hooks/use-admin-dashboard'
 import type { AdminUser, UserRole } from '@/types/admin-dashboard'
 import {
   UserPlus,
   Users,
+  UserCheck,
   MoreHorizontal,
   UserX,
   Loader2,

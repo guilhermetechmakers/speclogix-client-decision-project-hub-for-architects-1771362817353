@@ -18,6 +18,7 @@ import { TasksRfisPage } from '@/pages/tasks-rfis'
 import ApprovalsESignaturesPage from '@/pages/ApprovalsESignatures'
 import ReportsAnalyticsPage from '@/pages/ReportsAnalytics'
 import { AdminDashboardPage } from '@/pages/admin-dashboard'
+import PerformanceCachingBackupPage from '@/pages/PerformanceCachingBackup'
 import { SettingsPage } from '@/pages/settings'
 import { PricingPage } from '@/pages/pricing'
 import { HelpPage } from '@/pages/help'
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
   { path: '/decision-log', element: <Navigate to="/dashboard/decisions" replace /> },
   { path: '/meetings-&-agendas', element: <Navigate to="/dashboard/meetings" replace /> },
   { path: '/reports-&-analytics', element: <Navigate to="/dashboard/reports" replace /> },
+  { path: '/performance-caching-&-backup', element: <Navigate to="/dashboard/performance-caching-backup" replace /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <LoginPage /> },
   { path: '/signup-/-login', element: <SignupLoginPage /> },
@@ -64,6 +66,7 @@ export const router = createBrowserRouter([
       { path: 'approvals', element: <ApprovalsESignaturesPage /> },
       { path: 'approvals-e-signatures', element: <ApprovalsESignaturesPage /> },
       { path: 'reports', element: <ReportsAnalyticsPage /> },
+      { path: 'performance-caching-backup', element: <PerformanceCachingBackupPage /> },
       { path: 'admin', element: <AdminDashboardPage /> },
       { path: 'admin-dashboard', element: <AdminDashboardPage /> },
       { path: 'settings', element: <SettingsPage /> },

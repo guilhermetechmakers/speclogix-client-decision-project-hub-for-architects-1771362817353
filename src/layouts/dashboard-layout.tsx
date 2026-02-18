@@ -22,6 +22,7 @@ import {
   Menu,
   User,
   ShieldCheck,
+  HardDrive,
 } from 'lucide-react'
 
 const SIDEBAR_COLLAPSED_KEY = 'speclogix-sidebar-collapsed'
@@ -38,6 +39,7 @@ const mainNav = [
   { to: '/dashboard/tasks', label: 'Tasks & RFIs', icon: CheckSquare },
   { to: '/dashboard/approvals', label: 'Approvals & E-sign', icon: PenTool },
   { to: '/dashboard/reports', label: 'Reports & Analytics', icon: BarChart3 },
+  { to: '/dashboard/performance-caching-backup', label: 'Performance, Caching & Backup', icon: HardDrive },
   { to: '/dashboard/admin-dashboard', label: 'Admin & Billing', icon: ShieldCheck },
 ]
 
